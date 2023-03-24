@@ -1,14 +1,15 @@
 ﻿
+
 using Newtonsoft.Json;
 
 namespace Tarkov.Entities
 {
-    public class SkillLevel
+    public class Vendor
     {
         [JsonProperty("name")]
         public string Name { get; private set; }
 
-        [JsonProperty("level")]
-        public float Level { get; private set; }
+        [JsonProperty("normalizedName")]
+        public string NormalizedName { get; private set; }
     }
 }

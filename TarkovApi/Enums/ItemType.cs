@@ -1,0 +1,30 @@
+﻿namespace Tarkov.Enums
+{
+    public enum ItemType
+    {
+        ammo,
+        ammoBox,
+        any,
+        armor,
+        backpack,
+        barter,
+        container,
+        glasses,
+        grenade,
+        gun,
+        headphones,
+        helmet,
+        injectors,
+        keys,
+        markedOnly,
+        meds,
+        mods,
+        noFlea,
+        pistolGrip,
+        preset,
+        provisions,
+        rig,
+        suppressor,
+        wearable,
+    }
+}

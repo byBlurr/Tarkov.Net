@@ -1,15 +1,12 @@
-﻿
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using System.Numerics;
 
 namespace Tarkov.Entities
 {
-    public class TraderCashOffer
+    public class ItemPrice
     {
-        [JsonProperty("item")]
-        public Item Item { get; private set; }
-
-        [JsonProperty("minTraderLevel")]
-        public int MinTraderLevel { get; private set; }
+        [JsonProperty("vendor")]
+        public Vendor Vendor { get; private set; }
 
         [JsonProperty("price")]
         public int Price { get; private set; }
@@ -22,8 +19,5 @@ namespace Tarkov.Entities
 
         [JsonProperty("priceRUB")]
         public int PriceRUB { get; private set; }
-
-        [JsonProperty("taskUnlock")]
-        public Task TaskUnlock { get; private set; }
     }
 }

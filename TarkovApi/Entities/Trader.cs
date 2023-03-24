@@ -21,19 +21,19 @@ namespace Tarkov.Entities
         public string ResetTime { get; private set; }
 
         [JsonProperty("currency")]
-        public Item Currency { get; private set; }
+        public Item? Currency { get; private set; }
 
         [JsonProperty("discount")]
         public float Discount { get; private set; }
 
         [JsonProperty("levels")]
-        public TraderLevel[] Levels { get; private set; }
+        public TraderLevel[]? Levels { get; private set; }
 
         [JsonProperty("barters")]
-        public Barter[] Barters { get; private set; }
+        public Barter[]? Barters { get; private set; }
 
         [JsonProperty("cashOffers")]
-        public TraderCashOffer[] CashOffers { get; private set; }
+        public TraderCashOffer[]? CashOffers { get; private set; }
 
         [JsonProperty("imageLink")]
         public string ImageLink { get; private set; }

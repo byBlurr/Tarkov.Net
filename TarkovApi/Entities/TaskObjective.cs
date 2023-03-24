@@ -7,18 +7,16 @@ namespace Tarkov.Entities
         [JsonProperty("id")]
         public string Id { get; private set; }
 
-        [JsonProperty("trader")]
-        public Trader Trader { get; private set; }
+        [JsonProperty("type")]
+        public string Type { get; private set; }
 
-        [JsonProperty("requirementType")]
-        public string RequirementType { get; private set; }
+        [JsonProperty("description")]
+        public string Description { get; private set; }
 
-        [JsonProperty("compareMethod")]
-        public string CompareMethod { get; private set; }
+        [JsonProperty("maps")]
+        public Map[] Maps { get; private set; }
 
-        [JsonProperty("value")]
-        public int Value { get; private set; }
-
-
+        [JsonProperty("optional")]
+        public bool Optional { get; private set; }
     }
 }

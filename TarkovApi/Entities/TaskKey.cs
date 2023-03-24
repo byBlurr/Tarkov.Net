@@ -5,10 +5,10 @@ namespace Tarkov.Entities
     public class TaskKey
     {
         [JsonProperty("keys")]
-        public Item[] Keys { get; private set; }
+        public Item[]? Keys { get; private set; }
 
         [JsonProperty("map")]
-        public Map Map { get; private set; }
+        public Map? Map { get; private set; }
 
 
     }

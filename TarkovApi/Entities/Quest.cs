@@ -2,13 +2,13 @@
 
 namespace Tarkov.Entities
 {
-    public class Task
+    public class Quest
     {
         [JsonProperty("id")]
         public string Id { get; private set; }
 
         [JsonProperty("tarkovDataId")]
-        public int TarkovDataId { get; private set; }
+        public int? TarkovDataId { get; private set; } = 0;
 
         [JsonProperty("name")]
         public string Name { get; private set; }
@@ -17,10 +17,10 @@ namespace Tarkov.Entities
         public string NormalizedName { get; private set; }
 
         [JsonProperty("trader")]
-        public Trader Trader { get; private set; }
+        public Trader? Trader { get; private set; }
 
         [JsonProperty("map")]
-        public Map Map { get; private set; }
+        public Map? Map { get; private set; }
 
         [JsonProperty("experience")]
         public int Experience { get; private set; }
@@ -32,25 +32,25 @@ namespace Tarkov.Entities
         public int MinPlayerLevel { get; private set; }
 
         [JsonProperty("taskRequirements")]
-        public TaskStatusRequirement[] TaskRequirements { get; private set; }
+        public TaskStatusRequirement[]? TaskRequirements { get; private set; }
 
         [JsonProperty("traderRequirements")]
-        public RequirementTrader[] TraderRequirements { get; private set; }
+        public RequirementTrader[]? TraderRequirements { get; private set; }
 
         [JsonProperty("objectives")]
-        public TaskObjective[] Objectives { get; private set; }
+        public TaskObjective[]? Objectives { get; private set; }
 
         [JsonProperty("startRewards")]
-        public TaskRewards StartRewards { get; private set; }
+        public TaskRewards? StartRewards { get; private set; }
 
         [JsonProperty("finishRewards")]
-        public TaskRewards FinishRewards { get; private set; }
+        public TaskRewards? FinishRewards { get; private set; }
 
         [JsonProperty("failConditions")]
-        public TaskObjective[] FailConditions { get; private set; }
+        public TaskObjective[]? FailConditions { get; private set; }
 
         [JsonProperty("failureOutcome")]
-        public TaskRewards FailureOutcome { get; private set; }
+        public TaskRewards? FailureOutcome { get; private set; }
 
         [JsonProperty("restartable")]
         public bool Restartable { get; private set; }
@@ -59,7 +59,7 @@ namespace Tarkov.Entities
         public string FactionName { get; private set; }
 
         [JsonProperty("neededKeys")]
-        public TaskKey[] NeededKeys { get; private set; }
+        public TaskKey[]? NeededKeys { get; private set; }
 
         [JsonProperty("kappaRequired")]
         public bool KappaRequired { get; private set; }

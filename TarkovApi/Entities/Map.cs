@@ -8,7 +8,7 @@ namespace Tarkov.Entities
         public string Id { get; private set; }
 
         [JsonProperty("tarkovDataId")]
-        public string TarkovDataId { get; private set; }
+        public string? TarkovDataId { get; private set; }
 
         [JsonProperty("name")]
         public string Name { get; private set; }
@@ -23,7 +23,7 @@ namespace Tarkov.Entities
         public string Description { get; private set; }
 
         [JsonProperty("enemies")]
-        public String[] Enemies { get; private set; }
+        public string[] Enemies { get; private set; }
 
         [JsonProperty("raidDuration")]
         public int RaidDuration { get; private set; }
@@ -32,7 +32,7 @@ namespace Tarkov.Entities
         public string Players { get; private set; }
 
         [JsonProperty("bosses")]
-        public BossSpawn[] Bosses { get; private set; }
+        public BossSpawn[]? Bosses { get; private set; }
 
         [JsonProperty("nameId")]
         public string NameId { get; private set; }

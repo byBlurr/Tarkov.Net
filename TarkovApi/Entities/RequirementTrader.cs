@@ -8,7 +8,7 @@ namespace Tarkov.Entities
         public string Id { get; private set; }
 
         [JsonProperty("trader")]
-        public Trader Trader { get; private set; }
+        public Trader? Trader { get; private set; }
 
         [JsonProperty("requirementType")]
         public string RequirementType { get; private set; }
