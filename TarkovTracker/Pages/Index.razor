@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using Tarkov.Dictionaries;
 @using Tarkov.Entities;
 @using Tarkov;
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
@@ -8,16 +9,55 @@
 <h2>Tarkov Tracker Profile</h2>
 <p>Personalise the tracker to best suit you!</p>
 
-<h4>@time  |  @time2</h4>
+<h4>Ingame Time</h4>
+<p>@lhour:@minutes</p>
+<p>@rhour:@minutes</p>
 
-<button class="btn btn-primary" @onclick="DecrementCount">Level Down</button>
-<button class="btn btn-primary" @onclick="IncrementCount">Level Up</button>
-<button class="btn btn-primary" @onclick="SwitchFaction">Switch Faction</button>
+<h4>Details</h4>
+<table class="table">
+    <tbody>
+        <tr>
+            <td>Username</td>
+            <td>Not Implemented</td>
+        </tr>
+        <tr>
+            <td>Faction</td>
+            <td @onclick="SwitchFaction">@faction</td>
+        </tr>
+    </tbody>
+</table>
 
-<div class="grid-container">
-  <div class="grid-item">@faction</div>
-  <div class="grid-item">Level @currentLevel</div>
-</div>
+<h4>Levels</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Level</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>PMC</td>
+            <td>@currentLevel</td>
+            <button class="btn btn-primary" @onclick="LevelDown">Down</button>
+            <button class="btn btn-primary" @onclick="LevelUp">Up</button>
+        </tr>
+        @if (currentTraders != null)
+        {
+            @foreach (var trader in currentTraders)
+            {
+                <tr>
+                    <td>@Traders.TraderNames.GetValueOrDefault(trader.Key)</td>
+                    <td>@trader.Value</td>
+                    <button class="btn btn-primary" @onclick="() => LevelDownTrader(trader.Key)">Down</button>
+                    <button class="btn btn-primary" @onclick="() => LevelUpTrader(trader.Key)">Up</button>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
 
 <SurveyPrompt Title="Finding Tarkov Tracker helpful?" />
 <button class="btn btn-primary" @onclick="Delete">Reset Data</button>
@@ -27,15 +67,20 @@
     Api tarkov = Api.GetTarkov();
     private int currentLevel = 1;
     private string faction = "USEC";
-    private string time = "updating...";
-    private string time2 = "updating...";
+    private Dictionary<string, int> currentTraders;
+
+    private string lhour = "00";
+    private string rhour = "12";
+    private string minutes = "00";
 
     protected override async Task OnAfterRenderAsync(bool bFirstRender)
     {
         TimeSpan left = tarkov.GetTime();
         TimeSpan right = tarkov.GetTime().Add(TimeSpan.FromHours(12));
-        time = $"{left.Hours,2}:{left.Minutes,2}";
-        time2 = $"{right.Hours,2}:{right.Minutes,2}";
+
+        minutes = left.Minutes < 10 ? "0" + left.Minutes.ToString() : left.Minutes.ToString();
+        lhour = left.Hours < 10 ? "0" + left.Hours.ToString() : left.Hours.ToString();
+        rhour = right.Hours < 10 ? "0" + right.Hours.ToString() : right.Hours.ToString();
 
         if (bFirstRender)
         {
@@ -53,17 +98,58 @@
         }
     }
 
-    private async Task IncrementCount()
+    private async Task LevelUp()
     {
         currentLevel++;
         if (currentLevel > 70) currentLevel = 1;
         await Save();
     }
 
-    private async Task DecrementCount()
+    private async Task LevelDown()
     {
         currentLevel--;
         if (currentLevel < 1) currentLevel = 70;
+        await Save();
+    }
+
+    private async Task LevelUpTrader(string id)
+    {
+        int newLevel = 1;
+        if (id != Traders.TraderIds.GetValueOrDefault("fence") && id != Traders.TraderIds.GetValueOrDefault("lightkeeper"))
+        {
+            newLevel = currentTraders.GetValueOrDefault(id) + 1;
+            if (newLevel > 4) newLevel = 4;
+        }
+        else if (id == Traders.TraderIds.GetValueOrDefault("fence"))
+        {
+            newLevel = currentTraders.GetValueOrDefault(id) + 1;
+            if (newLevel > 2) newLevel = 2;
+        }
+        else
+        {
+            newLevel = currentTraders.GetValueOrDefault(id) + 1;
+            if (newLevel > 1) newLevel = 1;
+        }
+        currentTraders.Remove(id);
+        currentTraders.Add(id, newLevel);
+        await Save();
+    }
+
+    private async Task LevelDownTrader(string id)
+    {
+        int newLevel = 1;
+        if (id != Traders.TraderIds.GetValueOrDefault("fence") && id != Traders.TraderIds.GetValueOrDefault("lightkeeper"))
+        {
+            newLevel = currentTraders.GetValueOrDefault(id) - 1;
+            if (newLevel < 1) newLevel = 1;
+        }
+        else if (id == Traders.TraderIds.GetValueOrDefault("fence") || id == Traders.TraderIds.GetValueOrDefault("lightkeeper"))
+        {
+            newLevel = currentTraders.GetValueOrDefault(id) - 1;
+            if (newLevel < 0) newLevel = 0;
+        }
+        currentTraders.Remove(id);
+        currentTraders.Add(id, newLevel);
         await Save();
     }
 
@@ -78,6 +164,7 @@
     {
         await BrowserStorage.SetAsync(StorageNames.PlayerFaction, faction);
         await BrowserStorage.SetAsync(StorageNames.PlayerLevel, currentLevel);
+        await BrowserStorage.SetAsync(StorageNames.TraderLevels, currentTraders);
         StateHasChanged();
     }
 
@@ -88,6 +175,9 @@
 
         var lresult = await BrowserStorage.GetAsync<int>(StorageNames.PlayerLevel);
         currentLevel = lresult.Success ? lresult.Value : 1;
+
+        var tlresult = await BrowserStorage.GetAsync<Dictionary<string, int>>(StorageNames.TraderLevels);
+        currentTraders = tlresult.Success ? tlresult.Value : Traders.GetFreshTraders();
     }
 
     public async Task Delete()
@@ -96,6 +186,7 @@
         await BrowserStorage.DeleteAsync(StorageNames.PlayerLevel);
         await BrowserStorage.DeleteAsync(StorageNames.CompletedTasks);
         await BrowserStorage.DeleteAsync(StorageNames.NeededItems);
+        await BrowserStorage.DeleteAsync(StorageNames.TraderLevels);
         await Read();
         StateHasChanged();
     }

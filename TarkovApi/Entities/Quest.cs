@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Text;
 
 namespace Tarkov.Entities
 {
@@ -78,5 +79,17 @@ namespace Tarkov.Entities
 
         [JsonProperty("failMessageId")]
         public string FailMessageId { get; private set; }
+
+        public string GetObjectives()
+        {
+            StringBuilder b = new StringBuilder();
+            
+            foreach (TaskObjective obj in Objectives)
+            {
+                b.AppendLine($"{obj.Description}");
+            }
+
+            return b.ToString();
+        }
     }
 }

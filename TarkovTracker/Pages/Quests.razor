@@ -7,6 +7,7 @@
 
 @using Tarkov.Common;
 @using Tarkov;
+@using Tarkov.Dictionaries;
 @using Tarkov.Entities;
 @using TarkovTracker.Data;
 
@@ -32,20 +33,35 @@ else
                 <th>Trader</th>
                 <th>Title</th>
                 <th>Description</th>
+                <th>Maps</th>
                 <th></th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
-        @foreach (var quest in quests)
+        @foreach (Quest quest in quests)
         {
             if (quest != null)
             {
                 <tr>
                     <td>@quest.Trader.Name</td>
                     <td>@quest.Name</td>
-                    <td>@quest.DescriptionMessageId</td>
-                    <button class="btn btn-primary">Info</button>
+
+                    <td width="60%">
+                    @foreach (var obj in quest.Objectives)
+                    {
+                        @obj.Description<br />
+                    }
+                    </td>
+                    @if (quest.Map != null)
+                    {
+                        <td>@quest.Map.Name</td>
+                    }
+                    else
+                    {
+                        <td>Any Location</td>
+                    }
+                    <button class="btn btn-primary" href="/view">Info</button>
                     <button class="btn btn-primary" @onclick="() => CompleteTaskAsync(quest.Id)">Complete</button>
                 </tr>
             }
@@ -60,6 +76,7 @@ else
     private List<string>? completedQuests;
     private List<RQuest>? questMap;
     private int currentLevel;
+    private Dictionary<string, int> currentTraders;
 
     private List<Quest>? quests;
     private bool updating = true;
@@ -73,6 +90,7 @@ else
     {
         completedQuests.Add(id);
         updating = true;
+        await BrowserStorage.SetAsync(StorageNames.CompletedTasks, completedQuests);
         await UpdateAsync();
     }
 
@@ -80,6 +98,9 @@ else
     {
         var lresult = await BrowserStorage.GetAsync<int>(StorageNames.PlayerLevel);
         currentLevel = lresult.Success ? lresult.Value : 1;
+
+        var tlresult = await BrowserStorage.GetAsync<Dictionary<string, int>>(StorageNames.TraderLevels);
+        currentTraders = tlresult.Success ? tlresult.Value : Traders.GetFreshTraders();
 
         var fresult = await BrowserStorage.GetAsync<string>(StorageNames.PlayerFaction);
         string faction = fresult.Success ? fresult.Value : "USEC";
@@ -98,7 +119,7 @@ else
         List<Quest> updatedQuests = new List<Quest>();
         foreach (RQuest q in questMap)
         {
-            if (q.IsUnlocked(currentLevel) && !completedQuests.Contains(q.Id))
+            if (q.IsUnlocked(currentLevel, currentTraders) && !completedQuests.Contains(q.Id))
             {
                 updatedQuests.Add(await tarkov.GetTaskAsync(q.Id));
             }

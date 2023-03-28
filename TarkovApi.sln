@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TarkovApi", "TarkovApi\Tark
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TarkovTesting", "TarkovTesting\TarkovTesting.csproj", "{83E1E7B8-47A0-419C-9F07-AFEA24AF650C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TarkovTracker", "TarkovTracker\TarkovTracker.csproj", "{F6A8C8E3-3E59-44E5-BB41-0420EB8E1732}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TarkovTracker", "TarkovTracker\TarkovTracker.csproj", "{F6A8C8E3-3E59-44E5-BB41-0420EB8E1732}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

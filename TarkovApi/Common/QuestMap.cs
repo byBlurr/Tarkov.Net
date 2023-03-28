@@ -35,6 +35,18 @@ namespace Tarkov.Common
                         }
                     }
 
+
+                    if (quest.TraderRequirements != null)
+                    {
+                        foreach (var tr in quest.TraderRequirements)
+                        {
+                            if (tr != null)
+                            {
+                                if (tr.Trader != null) q.requiredTraders.Add(tr.Trader.Id, tr.Value);
+                            }
+                        }
+                    }
+
                     map.Add(q);
                 }
             }
@@ -43,25 +55,35 @@ namespace Tarkov.Common
         }
     }
 
-    public class RQuest // NEEDS PROPER NAMEs
+    public class RQuest // NEEDS PROPER NAME
     {
         public string Name { get; set; }
         public string Id { get; set; }
 
         public Dictionary<string, bool> RequiredQuests { get; set; }
+        public Dictionary<string, int> requiredTraders { get; set; }
         public int MinLevel { get; }
 
         public RQuest(int minLevel)
         {
             MinLevel = minLevel;
             RequiredQuests = new Dictionary<string, bool>();
+            requiredTraders = new Dictionary<string, int>();
         }
 
-        public bool IsUnlocked(int level)
+        public bool IsUnlocked(int level, Dictionary<string, int> traders)
         {
             if (level >= MinLevel)
             {
                 return (!RequiredQuests.ContainsValue(false));
+            }
+
+            foreach (var trader in traders)
+            {
+                if (requiredTraders.ContainsKey(trader.Key))
+                {
+                    if (trader.Value != requiredTraders.GetValueOrDefault(trader.Key)) return false;
+                }
             }
 
             return false;
