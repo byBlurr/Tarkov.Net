@@ -1,10 +1,110 @@
 ﻿@page "/quests"
-@using Tarkov;
+
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedLocalStorage BrowserStorage
 
 <PageTitle>Quests</PageTitle>
 
-<h1>Quests</h1>
+@using Tarkov.Common;
+@using Tarkov;
+@using Tarkov.Entities;
+@using TarkovTracker.Data;
 
+
+@if (updating)
+{
+    <h2>Active Quests (Updating...)</h2>
+}
+else
+{
+    <h2>Active Quests</h2>
+}
+
+@if (quests == null || quests.Count <= 0)
+{
+    <p><em>No active quests to show!</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Trader</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var quest in quests)
+        {
+            if (quest != null)
+            {
+                <tr>
+                    <td>@quest.Trader.Name</td>
+                    <td>@quest.Name</td>
+                    <td>@quest.DescriptionMessageId</td>
+                    <button class="btn btn-primary">Info</button>
+                    <button class="btn btn-primary" @onclick="() => CompleteTaskAsync(quest.Id)">Complete</button>
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+}
 
 @code {
+    private Api tarkov = Api.GetTarkov();
+    private Quest[]? allQuests;
+    private List<string>? completedQuests;
+    private List<RQuest>? questMap;
+    private int currentLevel;
+
+    private List<Quest>? quests;
+    private bool updating = true;
+
+    protected override async Task OnAfterRenderAsync(bool bFirstRender)
+    {
+        if (bFirstRender) await InitialiseAsync();
+    }
+
+    private async Task CompleteTaskAsync(string id)
+    {
+        completedQuests.Add(id);
+        updating = true;
+        await UpdateAsync();
+    }
+
+    private async Task InitialiseAsync()
+    {
+        var lresult = await BrowserStorage.GetAsync<int>(StorageNames.PlayerLevel);
+        currentLevel = lresult.Success ? lresult.Value : 1;
+
+        var fresult = await BrowserStorage.GetAsync<string>(StorageNames.PlayerFaction);
+        string faction = fresult.Success ? fresult.Value : "USEC";
+
+        allQuests = await tarkov.GetTasksAsync(true, faction);
+
+        var cresult = await BrowserStorage.GetAsync<List<string>>(StorageNames.CompletedTasks);
+        completedQuests = cresult.Success ? cresult.Value : new List<string>();
+
+        await UpdateAsync();
+    }
+
+    private async Task UpdateAsync()
+    {
+        questMap = QuestMap.GetQuestMap(allQuests, completedQuests);
+        List<Quest> updatedQuests = new List<Quest>();
+        foreach (RQuest q in questMap)
+        {
+            if (q.IsUnlocked(currentLevel) && !completedQuests.Contains(q.Id))
+            {
+                updatedQuests.Add(await tarkov.GetTaskAsync(q.Id));
+            }
+        }
+        quests = updatedQuests;
+        updating = false;
+        StateHasChanged();
+    }
 }

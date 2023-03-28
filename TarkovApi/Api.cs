@@ -54,6 +54,16 @@ namespace Tarkov
             }
         }
 
+        public TimeSpan GetTime()
+        {
+            // tarkov time = (real time * 7 % 24 hr) +3 hour
+            long real = DateTime.UtcNow.TimeOfDay.Ticks;
+            long russia = TimeSpan.TicksPerHour * 3;
+            int tarkyRatio = 7;
+
+            return TimeSpan.FromTicks(((real * tarkyRatio) % (TimeSpan.TicksPerHour * 24)) + russia);
+        }
+
         public async Task<Quest[]> GetTasksAsync(bool reduced = true, string faction = "ALL")
         {
             if (faction.Equals("ALL"))

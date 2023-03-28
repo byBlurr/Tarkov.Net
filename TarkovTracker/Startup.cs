@@ -1,7 +1,5 @@
 ﻿using ElectronNET.API;
 
-using TarkovTracker.Data;
-
 namespace TarkovTracker
 {
     public class Startup
@@ -19,7 +17,6 @@ namespace TarkovTracker
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
             services.AddHttpContextAccessor();
 
             //services.AddScoped<StateContainer>();

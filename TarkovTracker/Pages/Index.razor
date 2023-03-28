@@ -2,10 +2,13 @@
 @using Tarkov.Entities;
 @using Tarkov;
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using TarkovTracker.Data;
 @inject ProtectedLocalStorage BrowserStorage
 
-<h1>Tarkov Tracker Profile</h1>
+<h2>Tarkov Tracker Profile</h2>
 <p>Personalise the tracker to best suit you!</p>
+
+<h4>@time  |  @time2</h4>
 
 <button class="btn btn-primary" @onclick="DecrementCount">Level Down</button>
 <button class="btn btn-primary" @onclick="IncrementCount">Level Up</button>
@@ -17,18 +20,36 @@
 </div>
 
 <SurveyPrompt Title="Finding Tarkov Tracker helpful?" />
+<button class="btn btn-primary" @onclick="Delete">Reset Data</button>
 
 @code {
 
+    Api tarkov = Api.GetTarkov();
     private int currentLevel = 1;
     private string faction = "USEC";
+    private string time = "updating...";
+    private string time2 = "updating...";
 
     protected override async Task OnAfterRenderAsync(bool bFirstRender)
     {
+        TimeSpan left = tarkov.GetTime();
+        TimeSpan right = tarkov.GetTime().Add(TimeSpan.FromHours(12));
+        time = $"{left.Hours,2}:{left.Minutes,2}";
+        time2 = $"{right.Hours,2}:{right.Minutes,2}";
+
         if (bFirstRender)
         {
             await Read();
-            base.StateHasChanged();
+
+            // Start a loop to update the time
+            await InvokeAsync(async () =>
+            {
+                while (true)
+                {
+                    StateHasChanged();
+                    await Task.Delay(1250);
+                }
+            });
         }
     }
 
@@ -55,22 +76,27 @@
 
     public async Task Save()
     {
-        await BrowserStorage.SetAsync("faction", faction);
-        await BrowserStorage.SetAsync("level", currentLevel);
+        await BrowserStorage.SetAsync(StorageNames.PlayerFaction, faction);
+        await BrowserStorage.SetAsync(StorageNames.PlayerLevel, currentLevel);
+        StateHasChanged();
     }
 
     public async Task Read()
     {
-        var fresult = await BrowserStorage.GetAsync<string>("faction");
+        var fresult = await BrowserStorage.GetAsync<string>(StorageNames.PlayerFaction);
         faction = fresult.Success ? fresult.Value : "USEC";
 
-        var lresult = await BrowserStorage.GetAsync<int>("level");
+        var lresult = await BrowserStorage.GetAsync<int>(StorageNames.PlayerLevel);
         currentLevel = lresult.Success ? lresult.Value : 1;
     }
 
     public async Task Delete()
     {
-        await BrowserStorage.DeleteAsync("faction");
-        await BrowserStorage.DeleteAsync("level");
+        await BrowserStorage.DeleteAsync(StorageNames.PlayerFaction);
+        await BrowserStorage.DeleteAsync(StorageNames.PlayerLevel);
+        await BrowserStorage.DeleteAsync(StorageNames.CompletedTasks);
+        await BrowserStorage.DeleteAsync(StorageNames.NeededItems);
+        await Read();
+        StateHasChanged();
     }
 }
