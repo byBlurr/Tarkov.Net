@@ -1,0 +1,76 @@
+﻿@page "/"
+@using Tarkov.Entities;
+@using Tarkov;
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedLocalStorage BrowserStorage
+
+<h1>Tarkov Tracker Profile</h1>
+<p>Personalise the tracker to best suit you!</p>
+
+<button class="btn btn-primary" @onclick="DecrementCount">Level Down</button>
+<button class="btn btn-primary" @onclick="IncrementCount">Level Up</button>
+<button class="btn btn-primary" @onclick="SwitchFaction">Switch Faction</button>
+
+<div class="grid-container">
+  <div class="grid-item">@faction</div>
+  <div class="grid-item">Level @currentLevel</div>
+</div>
+
+<SurveyPrompt Title="Finding Tarkov Tracker helpful?" />
+
+@code {
+
+    private int currentLevel = 1;
+    private string faction = "USEC";
+
+    protected override async Task OnAfterRenderAsync(bool bFirstRender)
+    {
+        if (bFirstRender)
+        {
+            await Read();
+            base.StateHasChanged();
+        }
+    }
+
+    private async Task IncrementCount()
+    {
+        currentLevel++;
+        if (currentLevel > 70) currentLevel = 1;
+        await Save();
+    }
+
+    private async Task DecrementCount()
+    {
+        currentLevel--;
+        if (currentLevel < 1) currentLevel = 70;
+        await Save();
+    }
+
+    private async Task SwitchFaction()
+    {
+        if (faction.Equals("USEC")) faction = "BEAR";
+        else faction = "USEC";
+        await Save();
+    }
+
+    public async Task Save()
+    {
+        await BrowserStorage.SetAsync("faction", faction);
+        await BrowserStorage.SetAsync("level", currentLevel);
+    }
+
+    public async Task Read()
+    {
+        var fresult = await BrowserStorage.GetAsync<string>("faction");
+        faction = fresult.Success ? fresult.Value : "USEC";
+
+        var lresult = await BrowserStorage.GetAsync<int>("level");
+        currentLevel = lresult.Success ? lresult.Value : 1;
+    }
+
+    public async Task Delete()
+    {
+        await BrowserStorage.DeleteAsync("faction");
+        await BrowserStorage.DeleteAsync("level");
+    }
+}

@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
+using System.Net;
 using System.Net.Http.Json;
+using System.Runtime.Serialization.Formatters.Binary;
 using Tarkov.Dictionaries;
 using Tarkov.Entities;
 
