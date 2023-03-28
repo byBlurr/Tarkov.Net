@@ -19,7 +19,6 @@ namespace Tarkov.Dictionaries
             {"ragman", "5ac3b934156ae10c4430e83c"},
             {"jaeger", "5c0647fdd443bc2504c2d371"},
             {"lightkeeper", "638f541a29ffd1183d187f57"},
-            {default, "unknown" }
         };
         public static readonly Dictionary<string, string> TraderNames = new Dictionary<string, string>()
         {
@@ -32,7 +31,6 @@ namespace Tarkov.Dictionaries
             {"5ac3b934156ae10c4430e83c", "ragman"},
             {"5c0647fdd443bc2504c2d371", "jaeger"},
             {"638f541a29ffd1183d187f57", "lightkeeper"},
-            {default, "unknown" }
         };
 
         public static Dictionary<string, int> GetFreshTraders()

@@ -44,10 +44,10 @@ else
             if (quest != null)
             {
                 <tr>
-                    <td>@quest.Trader.Name</td>
-                    <td>@quest.Name</td>
+                    <td width="8%">@quest.Trader.Name</td>
+                    <td width="17%">@quest.Name</td>
 
-                    <td width="60%">
+                    <td width="55%">
                     @foreach (var obj in quest.Objectives)
                     {
                         @obj.Description<br />
@@ -55,14 +55,14 @@ else
                     </td>
                     @if (quest.Map != null)
                     {
-                        <td>@quest.Map.Name</td>
+                        <td width="10%">@quest.Map.Name</td>
                     }
                     else
                     {
-                        <td>Any Location</td>
+                        <td width="10%">Any Location</td>
                     }
-                    <button class="btn btn-primary" href="/view">Info</button>
-                    <button class="btn btn-primary" @onclick="() => CompleteTaskAsync(quest.Id)">Complete</button>
+                    <button class="btn btn-primary"><span class="oi oi-info"> </span></button>
+                    <button class="btn btn-primary" @onclick="() => CompleteTaskAsync(quest.Id)"><span class="oi oi-check"> </span></button>
                 </tr>
             }
         }

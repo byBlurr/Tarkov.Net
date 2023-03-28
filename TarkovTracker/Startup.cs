@@ -57,7 +57,12 @@ namespace TarkovTracker
 
             if (HybridSupport.IsElectronActive)
             {
-                Task.Run(async () => await Electron.WindowManager.CreateWindowAsync());
+                Task.Run(async () =>
+                {
+                    var window = await Electron.WindowManager.CreateWindowAsync();
+                    window.SetMinimumSize(1280, 720);
+                });
+                
             }
 
 
