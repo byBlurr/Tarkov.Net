@@ -34,8 +34,6 @@ else
                 <th>Title</th>
                 <th>Description</th>
                 <th>Maps</th>
-                <th></th>
-                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -45,9 +43,12 @@ else
             {
                 <tr>
                     <td width="8%">@quest.Trader.Name</td>
+                    @code {
+                        //<td width="17%"><a href="@quest.WikiLink">@quest.Name</a></td>
+                    }
                     <td width="17%">@quest.Name</td>
 
-                    <td width="55%">
+                    <td width="40%">
                     @foreach (var obj in quest.Objectives)
                     {
                         @obj.Description<br />
@@ -61,8 +62,8 @@ else
                     {
                         <td width="10%">Any Location</td>
                     }
-                    <button class="btn btn-primary"><span class="oi oi-info"> </span></button>
-                    <button class="btn btn-primary" @onclick="() => CompleteTaskAsync(quest.Id)"><span class="oi oi-check"> </span></button>
+                    <a href="quest/@quest.Id"><button class="btn btn-primary"><span class="oi oi-info"> </span></button></a>
+                    <a><button class="btn btn-primary" @onclick="() => CompleteTaskAsync(quest.Id)"><span class="oi oi-check"> </span></button></a>
                 </tr>
             }
         }
@@ -72,7 +73,6 @@ else
 
 @code {
     private Api tarkov = Api.GetTarkov();
-    private Quest[]? allQuests;
     private List<string>? completedQuests;
     private List<RQuest>? questMap;
     private int currentLevel;
@@ -91,7 +91,7 @@ else
         completedQuests.Add(id);
         updating = true;
         await BrowserStorage.SetAsync(StorageNames.CompletedTasks, completedQuests);
-        await UpdateAsync();
+        await UpdateAsync(false);
     }
 
     private async Task InitialiseAsync()
@@ -105,27 +105,48 @@ else
         var fresult = await BrowserStorage.GetAsync<string>(StorageNames.PlayerFaction);
         string faction = fresult.Success ? fresult.Value : "USEC";
 
-        allQuests = await tarkov.GetTasksAsync(true, faction);
-
         var cresult = await BrowserStorage.GetAsync<List<string>>(StorageNames.CompletedTasks);
         completedQuests = cresult.Success ? cresult.Value : new List<string>();
 
-        await UpdateAsync();
+        await UpdateAsync(true);
     }
 
-    private async Task UpdateAsync()
+    private async Task UpdateAsync(bool bFirst)
     {
-        questMap = QuestMap.GetQuestMap(allQuests, completedQuests);
-        List<Quest> updatedQuests = new List<Quest>();
-        foreach (RQuest q in questMap)
+        if (!bFirst || Cache.LoadedQuests == null)
         {
-            if (q.IsUnlocked(currentLevel, currentTraders) && !completedQuests.Contains(q.Id))
+            // This method is wayyy too slow
+            questMap = QuestMap.GetQuestMap(Cache.AllQuests.Values.ToArray(), completedQuests);
+            /*List<Quest> updatedQuests = new List<Quest>();
+            foreach (RQuest q in questMap)
             {
-                updatedQuests.Add(await tarkov.GetTaskAsync(q.Id));
+                if (q.IsUnlocked(currentLevel, currentTraders) && !completedQuests.Contains(q.Id))
+                {
+                    updatedQuests.Add(await tarkov.GetTaskAsync(q.Id));
+                }
             }
+            Cache.LoadedQuests = updatedQuests;*/
+            Cache.LoadedQuests = GetActiveTasks(questMap);
         }
-        quests = updatedQuests;
+        quests = Cache.LoadedQuests;
         updating = false;
         StateHasChanged();
+    }
+
+    public List<Quest> GetActiveTasks(List<RQuest> questMap)
+    {
+        List<Quest> quests = new List<Quest>();
+
+        if (Cache.AllQuests != null)
+        {
+            foreach (RQuest quest in questMap)
+            {
+                if (quest.IsUnlocked(currentLevel, currentTraders))
+                {
+                    quests.Add(Cache.AllQuests.GetValueOrDefault(quest.Id));
+                }
+            }
+        }
+        return quests;
     }
 }

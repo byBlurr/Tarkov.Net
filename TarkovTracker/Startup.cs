@@ -1,4 +1,5 @@
 ﻿using ElectronNET.API;
+using TarkovTracker.Data;
 
 namespace TarkovTracker
 {
@@ -59,14 +60,13 @@ namespace TarkovTracker
             {
                 Task.Run(async () =>
                 {
+                    await Cache.LoadCache();
                     var window = await Electron.WindowManager.CreateWindowAsync();
                     window.SetMinimumSize(1280, 720);
+                    window.SetSize(1280, 720);
                 });
                 
             }
-
-
-
         }
     }
 }

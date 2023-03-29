@@ -10,8 +10,16 @@
 <p>Personalise the tracker to best suit you!</p>
 
 <h4>Ingame Time</h4>
-<p>@lhour:@minutes</p>
-<p>@rhour:@minutes</p>
+<div class="timebox" width="100px">
+    <table class="table">
+        <tbody>
+            <tr>
+                <td>@lhour:@minutes</td>
+                <td>@rhour:@minutes</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 
 <h4>Details</h4>
 <table class="table">
@@ -33,16 +41,14 @@
         <tr>
             <th>Name</th>
             <th>Level</th>
-            <th></th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
         <tr>
             <td>PMC</td>
             <td>@currentLevel</td>
-            <button class="btn btn-primary" @onclick="LevelDown">Down</button>
-            <button class="btn btn-primary" @onclick="LevelUp">Up</button>
+            <a><button class="btn btn-primary" @onclick="LevelDown">Down</button></a>
+            <a><button class="btn btn-primary" @onclick="LevelUp">Up</button></a>
         </tr>
         @if (currentTraders != null)
         {
@@ -51,8 +57,8 @@
                 <tr>
                     <td>@Traders.TraderNames.GetValueOrDefault(trader.Key)</td>
                     <td>@trader.Value</td>
-                    <button class="btn btn-primary" @onclick="() => LevelDownTrader(trader.Key)">Down</button>
-                    <button class="btn btn-primary" @onclick="() => LevelUpTrader(trader.Key)">Up</button>
+                    <a><button class="btn btn-primary" @onclick="() => LevelDownTrader(trader.Key)">Down</button></a>
+                    <a><button class="btn btn-primary" @onclick="() => LevelUpTrader(trader.Key)">Up</button></a>
                 </tr>
             }
         }
@@ -60,7 +66,7 @@
 </table>
 
 <SurveyPrompt Title="Finding Tarkov Tracker helpful?" />
-<button class="btn btn-primary" @onclick="Delete">Reset Data</button>
+<a><button class="btn btn-primary" @onclick="Delete">Reset Data</button></a>
 
 @code {
 
