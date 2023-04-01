@@ -3,6 +3,7 @@
 @using Tarkov.Enums;
 @using Tarkov;
 @using TarkovTracker.Components
+@using TarkovTracker.Data;
 <PageTitle>Crafts</PageTitle>
 
 <h2>Crafts</h2>	
@@ -43,7 +44,6 @@
 	private bool ShowAmmoCrafts = true;
 	private int MaxWorkbenchLevel = 4;
 
-	private Craft[] AllCrafts;
 	private List<Craft> AmmoCrafts;
 
 	protected override async Task OnAfterRenderAsync(bool bFirstRender)
@@ -53,12 +53,8 @@
 
 	private async Task InitialiseAsync()
 	{
-		Api tarkov = Api.GetTarkov();
-		AllCrafts = await tarkov.GetCraftsAsync();
-
-
 		AmmoCrafts = new List<Craft>();
-		foreach (Craft craft in AllCrafts)
+		foreach (Craft craft in Cache.WorkbenchCrafts.Values)
 		{
 			if (craft.RewardItems[0].Item.Category.Name.ToLower().Equals("ammo")) AmmoCrafts.Add(craft);
 		}

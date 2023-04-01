@@ -59,8 +59,12 @@ namespace TarkovTracker
             if (HybridSupport.IsElectronActive)
             {
                 Task.Run(async () =>
+				{
+                    // Move to own thread to reduce blocking (is technically still blocking?)
+					await Cache.LoadCache();
+				});
+                Task.Run(async () =>
                 {
-                    await Cache.LoadCache();
                     var window = await Electron.WindowManager.CreateWindowAsync();
                     window.SetMinimumSize(1280, 720);
                     window.SetSize(1280, 720);
