@@ -32,7 +32,7 @@
 				{
 					@if  (craft.Level <= MaxWorkbenchLevel)
 					{
-						<CraftDisplay CraftItem=@craft.RewardItems[0] RequiredItems=@craft.RequiredItems />
+						<CraftDisplay CraftItem=@craft.RewardItems[0] RequiredItems=@craft.RequiredItems CraftTime=@craft.Duration />
 					}
 				}
 			}
@@ -41,14 +41,29 @@
 }
 
 @code {
-	private bool ShowAmmoCrafts = true;
-	private int MaxWorkbenchLevel = 4;
+	private bool ShowFuelCover = true;
+	private bool ShowAmmoCrafts = false;
 
+	private bool ShowWorkbenchCrafts = false;
+	private int MaxWorkbenchLevel = 4;
+	private bool ShowMedCrafts = false;
+	private int MaxMedLevel = 4;
+	private bool ShowLavCrafts = false;
+	private int MaxLavLevel = 4;
+	private bool ShowIntelCrafts = false;
+	private int MaxIntelLevel = 4;
+	private bool ShowFoodCrafts = false;
+	private int MaxFoodLevel = 4;
+
+	private List<Craft> FuelCoverCrafts;
 	private List<Craft> AmmoCrafts;
 
 	protected override async Task OnInitializedAsync()
 	{
 		while (!Cache.Completed) await Task.Delay(100);
+
+		FuelCoverCrafts = new List<Craft>();
+
 
 		AmmoCrafts = new List<Craft>();
 		foreach (Craft craft in Cache.WorkbenchCrafts.Values)
@@ -61,4 +76,8 @@
 
 	private async Task ToggleAmmoAsync() => ShowAmmoCrafts = !ShowAmmoCrafts;
 	private void SetWorkbenchLevel(int lvl) => MaxWorkbenchLevel = lvl;
+	private void SetMedLevel(int lvl) => MaxMedLevel = lvl;
+	private void SetLavLevel(int lvl) => MaxLavLevel = lvl;
+	private void SetIntelLevel(int lvl) => MaxIntelLevel = lvl;
+	private void SetFoodLevel(int lvl) => MaxFoodLevel = lvl;
 }

@@ -1,0 +1,49 @@
+@using Tarkov;
+@using TarkovTracker.Data;
+
+@if (Status == TrackerStatus.CACHING)
+{
+    <div style="width:inherit; height:30px; background-color:yellow;" title="Collecting tarkovs data..."></div>
+}
+else if (Status == TrackerStatus.BAD)
+{
+    <div style = "width:inherit; height:30px; background-color:red;" title = "Tarkov is down :(" ></div>
+}
+
+@code {
+    private Api tarkov = Api.GetTarkov();
+    private TrackerStatus Status = TrackerStatus.BAD;
+    private string Message =  "Please wait...";
+
+    protected override async Task OnInitializedAsync()
+    {
+        InvokeAsync(async () =>
+        {
+            while (true)
+            {
+                var status = await tarkov.GetStatusAsync();
+                if (status != null)
+                {
+                    if (status.StatusCode.Equals("OK") && Cache.Completed)
+                    {
+                        Status = TrackerStatus.GOOD;
+                    }
+                    else if (status.StatusCode.Equals("OK"))
+                    {
+                        Status = TrackerStatus.CACHING;
+                        Message = "Collectig Data";
+                    }
+                    else
+                    {
+                        Status = TrackerStatus.BAD;
+                        Message = status.Message;
+                    }
+                }
+                StateHasChanged();
+                if (Status == TrackerStatus.CACHING) await Task.Delay(100);
+                else if (Status == TrackerStatus.BAD) await Task.Delay(1000);
+                else await Task.Delay(10000);
+            }
+        });
+    }
+}

@@ -65,6 +65,12 @@ namespace Tarkov
             return TimeSpan.FromTicks(((real * tarkyRatio) % (TimeSpan.TicksPerHour * 24)) + russia);
         }
 
+        public async Task<Status?> GetStatusAsync()
+        {
+            var result = await MakeCallAsync("status", ObjectProperties.Status);
+            return result.Data.ServerStatus?.GeneralStatus;
+        }
+
         public async Task<Quest[]> GetTasksAsync(bool reduced = true, string faction = "ALL")
         {
             if (faction.Equals("ALL"))

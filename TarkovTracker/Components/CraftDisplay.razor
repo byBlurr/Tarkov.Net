@@ -1,5 +1,5 @@
 ﻿@using Tarkov.Entities;
-<div class="alert alert-secondary mt-4" style="align-content:center; text-align:center; ">
+<div class="alert alert-secondary mt-4" style="align-content:center; text-align:center; height: 300px;">
     <div id="craft-reward" style="display: flex; align-content:center; text-align:center;">
         <img src="@CraftItem.Item.Image512pxLink" style="width:5vw; height:5vw;" />
         <h5>@CraftItem.Quantity x @CraftItem.Item.Name</h5>
@@ -22,6 +22,7 @@
                 @if (((int)CraftItem.Item.Avg24hPrice) != 0)
                 {
                     <p style="padding:0px; margin:0px;">Average Sell Price: @SellPrice (@CraftItem.Item.Avg24hPrice each)</p>
+                    <p style="padding:0px; margin:0px;">Profit: @Profit (@ProfitPerHour per hour)</p>
                 }
                 else
                 {
@@ -42,9 +43,14 @@
     [Parameter]
     public ContainedItem[] RequiredItems { get; set; }
 
+    [Parameter]
+    public int CraftTime { get; set; }
+
     private int TotalPrice = 0;
     private int EachPrice = 0;
     private int SellPrice = 0;
+    private int Profit = 0;
+    private float ProfitPerHour = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -57,7 +63,11 @@
         EachPrice = TotalPrice / (int)CraftItem.Quantity;
 
         if (CraftItem.Item.Avg24hPrice != null)
+        {
             SellPrice = ((int)CraftItem.Quantity * (int)CraftItem.Item.Avg24hPrice);
+            Profit = SellPrice - TotalPrice;
+            ProfitPerHour = ((float)Profit / ((float) CraftTime / 60.0f));
+        }
 
         
     }

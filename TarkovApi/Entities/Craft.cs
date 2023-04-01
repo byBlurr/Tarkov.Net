@@ -19,7 +19,7 @@ namespace Tarkov.Entities
         public Task TaskUnlock { get; private set; }
 
         [JsonProperty("duration")]
-        public int? Duration { get; private set; }
+        public int Duration { get; private set; }
 
         [JsonProperty("requiredItems")]
         public ContainedItem[] RequiredItems { get; private set; }
