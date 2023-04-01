@@ -11,6 +11,8 @@ namespace TarkovTracker.Data
 
         public static async Task LoadCache()
         {
+            AllQuests = new Dictionary<string, Quest>();
+
             Api tarkov = Api.GetTarkov();
             Quest[] quests = await tarkov.GetTasksAsync(false);
             foreach (var quest in quests) AllQuests.Add(quest.Id, quest);

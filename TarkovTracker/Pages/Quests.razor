@@ -141,7 +141,7 @@ else
         {
             foreach (RQuest quest in questMap)
             {
-                if (quest.IsUnlocked(currentLevel, currentTraders))
+                if (quest.IsUnlocked(currentLevel, currentTraders) && !completedQuests.Contains(quest.Id))
                 {
                     quests.Add(Cache.AllQuests.GetValueOrDefault(quest.Id));
                 }
