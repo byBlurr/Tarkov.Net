@@ -12,5 +12,8 @@ namespace Tarkov.Entities
     {
         [JsonProperty("tasks")]
         public Quest[] Tasks { get; private set; }
+
+        [JsonProperty("crafts")]
+        public Craft[] Crafts { get; private set; }
     }
 }

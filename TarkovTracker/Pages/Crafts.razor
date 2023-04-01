@@ -1,0 +1,71 @@
+﻿@page "/crafts"
+@using Tarkov.Entities;
+@using Tarkov.Enums;
+@using Tarkov;
+@using TarkovTracker.Components
+<PageTitle>Crafts</PageTitle>
+
+<h2>Crafts</h2>	
+@if (AmmoCrafts != null)
+{
+	<div style="max-width:850px; height:auto;">
+		<h4>Ammo Crafts</h4>
+		<div style="display: flex; align-content:center;  text-align:center;">
+			@if (ShowAmmoCrafts)
+			{
+				<a><button class="btn btn-primary" @onclick="ToggleAmmoAsync">Hide</button></a>
+				<a><button class="btn btn-primary" @onclick="() => SetWorkbenchLevel(1)">Level 1</button></a>
+				<a><button class="btn btn-primary" @onclick="() => SetWorkbenchLevel(2)">Level 2</button></a>
+				<a><button class="btn btn-primary" @onclick="() => SetWorkbenchLevel(3)">Level 3</button></a>
+				<a><button class="btn btn-primary" @onclick="() => SetWorkbenchLevel(4)">Level 4</button></a>
+			}
+			else
+			{
+				<div><a><button class="btn btn-primary" @onclick="ToggleAmmoAsync">Show</button></a></div>
+			}
+		</div>
+			<div class="card-group" style="display:grid; grid-template-columns: 1fr 1fr; column-gap: 5px; max-width:inherit; height:inherit;">
+			@if (ShowAmmoCrafts)
+			{
+				@foreach (Craft craft in AmmoCrafts)
+				{
+					@if  (craft.Level <= MaxWorkbenchLevel)
+					{
+						<CraftDisplay CraftItem=@craft.RewardItems[0] RequiredItems=@craft.RequiredItems />
+					}
+				}
+			}
+		</div>
+	</div>
+}
+
+@code {
+	private bool ShowAmmoCrafts = true;
+	private int MaxWorkbenchLevel = 4;
+
+	private Craft[] AllCrafts;
+	private List<Craft> AmmoCrafts;
+
+	protected override async Task OnAfterRenderAsync(bool bFirstRender)
+	{
+		if (bFirstRender) await InitialiseAsync();
+	}
+
+	private async Task InitialiseAsync()
+	{
+		Api tarkov = Api.GetTarkov();
+		AllCrafts = await tarkov.GetCraftsAsync();
+
+
+		AmmoCrafts = new List<Craft>();
+		foreach (Craft craft in AllCrafts)
+		{
+			if (craft.RewardItems[0].Item.Category.Name.ToLower().Equals("ammo")) AmmoCrafts.Add(craft);
+		}
+
+		StateHasChanged();
+	}
+
+	private async Task ToggleAmmoAsync() => ShowAmmoCrafts = !ShowAmmoCrafts;
+	private void SetWorkbenchLevel(int lvl) => MaxWorkbenchLevel = lvl;
+}

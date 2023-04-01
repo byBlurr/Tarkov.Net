@@ -61,7 +61,7 @@ namespace Tarkov.Entities
         public ItemType[] Types { get; private set; }
         
         [JsonProperty("avg24hPrice")]
-        public int Avg24hPrice { get; private set; }
+        public int? Avg24hPrice { get; private set; }
 
         //[JsonProperty("properties")]
         //public ItemProperties Properties { get; private set; }
@@ -91,7 +91,7 @@ namespace Tarkov.Entities
         public string Link { get; private set; }
 
         [JsonProperty("lastLowPrice")]
-        public int LastLowPrice { get; private set; }
+        public int? LastLowPrice { get; private set; }
 
         [JsonProperty("changeLast48h")]
         public float ChangeLast48h { get; private set; }
@@ -100,7 +100,7 @@ namespace Tarkov.Entities
         public float ChangeLast48hPercent { get; private set; }
 
         [JsonProperty("low24hPrice")]
-        public int Low24hPrice { get; private set; }
+        public int? Low24hPrice { get; private set; }
 
         [JsonProperty("high24hPrice")]
         public int High24hPrice { get; private set; }

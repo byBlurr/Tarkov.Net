@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Runtime.Serialization.Formatters.Binary;
 using Tarkov.Dictionaries;
 using Tarkov.Entities;
+using Tarkov.Enums;
 
 namespace Tarkov
 {
@@ -107,5 +108,26 @@ namespace Tarkov
             Console.WriteLine("Can't find quest with id: " + id);
             return null;
         }
+
+        public async Task<Craft[]> GetCraftsAsync(StationType station = StationType.ALL)
+        {
+			var result = await MakeCallAsync("crafts", ObjectProperties.Craft);
+            if (station == StationType.ALL)
+            {
+                return result.Data.Crafts;
+            }
+            else
+            {
+                List<Craft> crafts = new List<Craft>();
+                foreach (Craft craft in result.Data.Crafts)
+                {
+                   if (craft.Station.Id.Equals(HideoutStations.StationIds.GetValueOrDefault(station)))
+                   {
+                        crafts.Add(craft);
+                   }
+				}
+                return crafts.ToArray();
+			}
+		}
     }
 }

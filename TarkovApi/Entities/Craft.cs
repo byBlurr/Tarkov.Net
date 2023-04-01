@@ -13,13 +13,13 @@ namespace Tarkov.Entities
         public HideoutStation Station { get; private set; }
 
         [JsonProperty("level")]
-        public int Level { get; private set; }
+        public int? Level { get; private set; }
 
         [JsonProperty("taskUnlock")]
         public Task TaskUnlock { get; private set; }
 
         [JsonProperty("duration")]
-        public int Duration { get; private set; }
+        public int? Duration { get; private set; }
 
         [JsonProperty("requiredItems")]
         public ContainedItem[] RequiredItems { get; private set; }
