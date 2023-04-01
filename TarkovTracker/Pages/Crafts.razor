@@ -46,13 +46,10 @@
 
 	private List<Craft> AmmoCrafts;
 
-	protected override async Task OnAfterRenderAsync(bool bFirstRender)
+	protected override async Task OnInitializedAsync()
 	{
-		if (bFirstRender) await InitialiseAsync();
-	}
+		while (!Cache.Completed) await Task.Delay(100);
 
-	private async Task InitialiseAsync()
-	{
 		AmmoCrafts = new List<Craft>();
 		foreach (Craft craft in Cache.WorkbenchCrafts.Values)
 		{

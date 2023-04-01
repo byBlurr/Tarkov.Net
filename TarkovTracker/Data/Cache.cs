@@ -8,6 +8,7 @@ namespace TarkovTracker.Data
 {
     public static class Cache
     {
+		public static bool Completed = false;
         public static Dictionary<string, Quest> AllQuests { get; set; }
 		public static Dictionary<string, Craft> AllCrafts { get; set; }
 		public static Dictionary<string, Craft> WorkbenchCrafts { get; set; }
@@ -43,6 +44,8 @@ namespace TarkovTracker.Data
 				else if (craft.Station.Id.Equals(HideoutStations.StationIds.GetValueOrDefault(StationType.INTELLIGENCE))) IntelCrafts.Add(craft.Id, craft);
 				else if (craft.Station.Id.Equals(HideoutStations.StationIds.GetValueOrDefault(StationType.NUTRITION))) FoodCrafts.Add(craft.Id, craft);
 			}
+
+			Completed = true;
         }
     }
 }

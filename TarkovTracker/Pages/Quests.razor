@@ -81,11 +81,6 @@ else
     private List<Quest>? quests;
     private bool updating = true;
 
-    protected override async Task OnAfterRenderAsync(bool bFirstRender)
-    {
-        if (bFirstRender) await InitialiseAsync();
-    }
-
     private async Task CompleteTaskAsync(string id)
     {
         completedQuests.Add(id);
@@ -94,8 +89,10 @@ else
         await UpdateAsync(false);
     }
 
-    private async Task InitialiseAsync()
+    protected override async Task OnInitializedAsync()
     {
+        while (!Cache.Completed) await Task.Delay(100);
+
         var lresult = await BrowserStorage.GetAsync<int>(StorageNames.PlayerLevel);
         currentLevel = lresult.Success ? lresult.Value : 1;
 
