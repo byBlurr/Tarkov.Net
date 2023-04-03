@@ -1,0 +1,164 @@
+﻿@page "/profile"
+@using Tarkov.Dictionaries;
+@using Tarkov.Entities;
+@using Tarkov;
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using TarkovTracker.Data;
+@inject ProtectedLocalStorage BrowserStorage
+
+<h2>Profile</h2>
+<p>Personalise the tracker to best suit you!</p>
+
+<h4>Details</h4>
+<table class="table">
+    <tbody>
+        <tr>
+            <td>Username</td>
+            <td>Not Implemented</td>
+        </tr>
+        <tr>
+            <td>Faction</td>
+            <td @onclick="SwitchFaction">@faction</td>
+        </tr>
+    </tbody>
+</table>
+
+<h4>Levels</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Level</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>PMC</td>
+            <td>@currentLevel</td>
+            <a><button class="btn btn-primary" @onclick="LevelDown">Down</button></a>
+            <a><button class="btn btn-primary" @onclick="LevelUp">Up</button></a>
+        </tr>
+        @if (currentTraders != null)
+        {
+            @foreach (var trader in currentTraders)
+            {
+                <tr>
+                    <td>@Traders.TraderNames.GetValueOrDefault(trader.Key)</td>
+                    <td>@trader.Value</td>
+                    <a><button class="btn btn-primary" @onclick="() => LevelDownTrader(trader.Key)">Down</button></a>
+                    <a><button class="btn btn-primary" @onclick="() => LevelUpTrader(trader.Key)">Up</button></a>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<SurveyPrompt Title="Finding Tarkov Tracker helpful?" />
+<a><button class="btn btn-primary" @onclick="Delete">Reset Data</button></a>
+
+@code {
+
+    Api tarkov = Api.GetTarkov();
+    private int currentLevel = 1;
+    private string faction = "USEC";
+    private Dictionary<string, int> currentTraders;
+
+    protected override async Task OnAfterRenderAsync(bool bFirstRender)
+    {
+        if (bFirstRender) await Read();
+    }
+
+    private async Task LevelUp()
+    {
+        currentLevel++;
+        if (currentLevel > 70) currentLevel = 1;
+        await Save();
+    }
+
+    private async Task LevelDown()
+    {
+        currentLevel--;
+        if (currentLevel < 1) currentLevel = 70;
+        await Save();
+    }
+
+    private async Task LevelUpTrader(string id)
+    {
+        int newLevel = 1;
+        if (id != Traders.TraderIds.GetValueOrDefault("fence") && id != Traders.TraderIds.GetValueOrDefault("lightkeeper"))
+        {
+            newLevel = currentTraders.GetValueOrDefault(id) + 1;
+            if (newLevel > 4) newLevel = 4;
+        }
+        else if (id == Traders.TraderIds.GetValueOrDefault("fence"))
+        {
+            newLevel = currentTraders.GetValueOrDefault(id) + 1;
+            if (newLevel > 2) newLevel = 2;
+        }
+        else
+        {
+            newLevel = currentTraders.GetValueOrDefault(id) + 1;
+            if (newLevel > 1) newLevel = 1;
+        }
+        currentTraders.Remove(id);
+        currentTraders.Add(id, newLevel);
+        await Save();
+    }
+
+    private async Task LevelDownTrader(string id)
+    {
+        int newLevel = 1;
+        if (id != Traders.TraderIds.GetValueOrDefault("fence") && id != Traders.TraderIds.GetValueOrDefault("lightkeeper"))
+        {
+            newLevel = currentTraders.GetValueOrDefault(id) - 1;
+            if (newLevel < 1) newLevel = 1;
+        }
+        else if (id == Traders.TraderIds.GetValueOrDefault("fence") || id == Traders.TraderIds.GetValueOrDefault("lightkeeper"))
+        {
+            newLevel = currentTraders.GetValueOrDefault(id) - 1;
+            if (newLevel < 0) newLevel = 0;
+        }
+        currentTraders.Remove(id);
+        currentTraders.Add(id, newLevel);
+        await Save();
+    }
+
+    private async Task SwitchFaction()
+    {
+        if (faction.Equals("USEC")) faction = "BEAR";
+        else faction = "USEC";
+        await Save();
+    }
+
+    public async Task Save()
+    {
+        await BrowserStorage.SetAsync(StorageNames.PlayerFaction, faction);
+        await BrowserStorage.SetAsync(StorageNames.PlayerLevel, currentLevel);
+        await BrowserStorage.SetAsync(StorageNames.TraderLevels, currentTraders);
+        StateHasChanged();
+    }
+
+    public async Task Read()
+    {
+        var fresult = await BrowserStorage.GetAsync<string>(StorageNames.PlayerFaction);
+        faction = fresult.Success ? fresult.Value : "USEC";
+
+        var lresult = await BrowserStorage.GetAsync<int>(StorageNames.PlayerLevel);
+        currentLevel = lresult.Success ? lresult.Value : 1;
+
+        var tlresult = await BrowserStorage.GetAsync<Dictionary<string, int>>(StorageNames.TraderLevels);
+        currentTraders = tlresult.Success ? tlresult.Value : Traders.GetFreshTraders();
+        StateHasChanged();
+    }
+
+    public async Task Delete()
+    {
+        await BrowserStorage.DeleteAsync(StorageNames.PlayerFaction);
+        await BrowserStorage.DeleteAsync(StorageNames.PlayerLevel);
+        await BrowserStorage.DeleteAsync(StorageNames.CompletedTasks);
+        await BrowserStorage.DeleteAsync(StorageNames.NeededItems);
+        await BrowserStorage.DeleteAsync(StorageNames.TraderLevels);
+        await Read();
+        StateHasChanged();
+    }
+}

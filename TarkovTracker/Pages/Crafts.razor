@@ -6,10 +6,27 @@
 @using TarkovTracker.Data;
 <PageTitle>Crafts</PageTitle>
 
-<h2>Crafts</h2>	
+<h2>Crafts</h2>
+@if (Cache.Completed)
+{
+	<div style="max-width:875px; height:auto;">
+		<h4>Fuel Costs</h4>
+		<p class="craft-card-text">Metal: @Cache.MetalFuelCost (@MetalPerHour per hour)</p>
+		<p class="craft-card-text">Plastic: @Cache.PlasticFuelCost (@PlasticPerHour per hour)</p>
+		
+		<div class="card-group" style="display:grid; grid-template-columns: 1fr 1fr 1fr; column-gap: 5px; max-width:inherit; height:inherit;">
+		
+		@foreach (Craft craft in FuelCoverCrafts)
+		{
+			<CraftDisplay CraftItem=@craft.RewardItems[0] RequiredItems=@craft.RequiredItems CraftTime=@craft.Duration />
+		}
+		</div>
+	</div>
+}
+
 @if (AmmoCrafts != null)
 {
-	<div style="max-width:850px; height:auto;">
+	<div style="max-width:875px; height:auto;">
 		<h4>Ammo Crafts</h4>
 		<div style="display: flex; align-content:center;  text-align:center;">
 			@if (ShowAmmoCrafts)
@@ -25,7 +42,7 @@
 				<div><a><button class="btn btn-primary" @onclick="ToggleAmmoAsync">Show</button></a></div>
 			}
 		</div>
-			<div class="card-group" style="display:grid; grid-template-columns: 1fr 1fr; column-gap: 5px; max-width:inherit; height:inherit;">
+			<div class="card-group" style="display:grid; grid-template-columns: 1fr 1fr 1fr; column-gap: 5px; max-width:inherit; height:inherit;">
 			@if (ShowAmmoCrafts)
 			{
 				@foreach (Craft craft in AmmoCrafts)
@@ -41,10 +58,11 @@
 }
 
 @code {
-	private bool ShowFuelCover = true;
-	private bool ShowAmmoCrafts = false;
+	private float MetalPerHour = 0;
+	private float PlasticPerHour = 0;
 
 	private bool ShowWorkbenchCrafts = false;
+	private bool ShowAmmoCrafts = false;
 	private int MaxWorkbenchLevel = 4;
 	private bool ShowMedCrafts = false;
 	private int MaxMedLevel = 4;
@@ -63,13 +81,78 @@
 		while (!Cache.Completed) await Task.Delay(100);
 
 		FuelCoverCrafts = new List<Craft>();
-
+		MetalPerHour = (Cache.MetalFuelCost / 21);
+		PlasticPerHour = (Cache.PlasticFuelCost / 758) * 60;
 
 		AmmoCrafts = new List<Craft>();
+		float maxProf = 0.0f;
+		Craft maxProfC = null;
 		foreach (Craft craft in Cache.WorkbenchCrafts.Values)
 		{
 			if (craft.RewardItems[0].Item.Category.Name.ToLower().Equals("ammo")) AmmoCrafts.Add(craft);
+
+			float prof = GetProfit(craft);
+			if (prof > maxProf || maxProfC == null)
+			{
+				maxProf = prof;
+				maxProfC = craft;
+			}
 		}
+		FuelCoverCrafts.Add(maxProfC);
+
+		maxProf = 0.0f;
+		maxProfC = null;
+		foreach (Craft craft in Cache.MedCrafts.Values)
+		{
+			float prof = GetProfit(craft);
+			if (prof > maxProf || maxProfC == null)
+			{
+				maxProf = prof;
+				maxProfC = craft;
+			}
+		}
+		FuelCoverCrafts.Add(maxProfC);
+
+		maxProf = 0.0f;
+		maxProfC = null;
+		foreach (Craft craft in Cache.LavatoryCrafts.Values)
+		{
+			float prof = GetProfit(craft);
+			if (prof > maxProf || maxProfC == null)
+			{
+				maxProf = prof;
+				maxProfC = craft;
+			}
+		}
+		FuelCoverCrafts.Add(maxProfC);
+
+		maxProf = 0.0f;
+		maxProfC = null;
+		foreach (Craft craft in Cache.FoodCrafts.Values)
+		{
+			float prof = GetProfit(craft);
+			if (prof > maxProf || maxProfC == null)
+			{
+				maxProf = prof;
+				maxProfC = craft;
+			}
+		}
+		FuelCoverCrafts.Add(maxProfC);
+
+
+		maxProf = 0.0f;
+		maxProfC = null;
+		foreach (Craft craft in Cache.IntelCrafts.Values)
+		{
+			float prof = GetProfit(craft);
+			if (prof > maxProf || maxProfC == null)
+			{
+				maxProf = prof;
+				maxProfC = craft;
+			}
+		}
+		FuelCoverCrafts.Add(maxProfC);
+
 
 		StateHasChanged();
 	}
@@ -80,4 +163,18 @@
 	private void SetLavLevel(int lvl) => MaxLavLevel = lvl;
 	private void SetIntelLevel(int lvl) => MaxIntelLevel = lvl;
 	private void SetFoodLevel(int lvl) => MaxFoodLevel = lvl;
+
+	private float GetProfit(Craft craft)
+	{
+		float sell = (float)craft.RewardItems[0].Quantity * (float)craft.RewardItems[0].Item.Avg24hPrice;
+
+		float price = 0;
+		foreach (var i in craft.RequiredItems)
+		{
+			price += i.Item.Low24hPrice != null ? (float)i.Item.Low24hPrice * (float)i.Quantity : 0.0f;
+		}
+
+		float perHour = ((sell - price) / craft.Duration) * 60;
+		return perHour;
+	}
 }

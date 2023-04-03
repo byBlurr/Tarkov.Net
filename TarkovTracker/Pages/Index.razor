@@ -2,78 +2,49 @@
 @using Tarkov.Dictionaries;
 @using Tarkov.Entities;
 @using Tarkov;
-@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using TarkovTracker.Data;
-@inject ProtectedLocalStorage BrowserStorage
+s
+<h2>Tarkov Tracker</h2>
+<p>Keep track of your progress and what you need to do!</p>
 
-<h2>Tarkov Tracker Profile</h2>
-<p>Personalise the tracker to best suit you!</p>
-
-<h4>Ingame Time</h4>
-<div class="timebox" width="100px">
-    <table class="table">
-        <tbody>
-            <tr>
-                <td>@lhour:@minutes</td>
-                <td>@rhour:@minutes</td>
-            </tr>
-        </tbody>
-    </table>
+<div style="display:grid; grid-template-columns: 1fr 1fr 1fr; column-gap: 5px; max-width:inherit; height:inherit;">
+    <div class="card-group" style="width:200px; align-content: center; text-align:center;">
+        <h4>Ingame Time</h4>
+        <p class="craft-card-text">@lhour:@minutes  -|-  @rhour:@minutes</p>
+    </div>
+    <div class="card-group" style="width:200px; align-content: center; text-align:center;">
+        <h4>Tasks</h4>
+        <p class="craft-card-text">0/0 tasks completed</p>
+    </div>
+    <div class="card-group" style="width:200px; align-content: center; text-align:center;">
+        <h4>Collector</h4>
+        <p class="craft-card-text">0/0 items collected</p>
+    </div>
 </div>
 
-<h4>Details</h4>
-<table class="table">
-    <tbody>
-        <tr>
-            <td>Username</td>
-            <td>Not Implemented</td>
-        </tr>
-        <tr>
-            <td>Faction</td>
-            <td @onclick="SwitchFaction">@faction</td>
-        </tr>
-    </tbody>
-</table>
+<br />
 
-<h4>Levels</h4>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Level</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>PMC</td>
-            <td>@currentLevel</td>
-            <a><button class="btn btn-primary" @onclick="LevelDown">Down</button></a>
-            <a><button class="btn btn-primary" @onclick="LevelUp">Up</button></a>
-        </tr>
-        @if (currentTraders != null)
-        {
-            @foreach (var trader in currentTraders)
-            {
-                <tr>
-                    <td>@Traders.TraderNames.GetValueOrDefault(trader.Key)</td>
-                    <td>@trader.Value</td>
-                    <a><button class="btn btn-primary" @onclick="() => LevelDownTrader(trader.Key)">Down</button></a>
-                    <a><button class="btn btn-primary" @onclick="() => LevelUpTrader(trader.Key)">Up</button></a>
-                </tr>
-            }
-        }
-    </tbody>
-</table>
+<div style="display: flex; align-content:center;  text-align:center;">
+    <div style="min-width:400px; text-align:center;">
+        <h4>Changelog</h4>
+        <div>
+            <p class="craft-card-text">- Created the app.</p>
+        </div>
+    </div>
+
+    <div style="min-width:400px; text-align:center;">
+        <h4>Coming Soon...</h4>
+        <div>
+            <p class="craft-card-text">- Add coming soon and changelog.</p>
+        </div>
+    </div>
+</div>
 
 <SurveyPrompt Title="Finding Tarkov Tracker helpful?" />
-<a><button class="btn btn-primary" @onclick="Delete">Reset Data</button></a>
 
 @code {
 
     Api tarkov = Api.GetTarkov();
-    private int currentLevel = 1;
-    private string faction = "USEC";
-    private Dictionary<string, int> currentTraders;
 
     private string lhour = "00";
     private string rhour = "12";
@@ -90,8 +61,6 @@
 
         if (bFirstRender)
         {
-            await Read();
-
             // Start a loop to update the time
             await InvokeAsync(async () =>
             {
@@ -104,102 +73,8 @@
         }
     }
 
-    private async Task LevelUp()
-    {
-        currentLevel++;
-        if (currentLevel > 70) currentLevel = 1;
-        await Save();
-    }
-
-    private async Task LevelDown()
-    {
-        currentLevel--;
-        if (currentLevel < 1) currentLevel = 70;
-        await Save();
-    }
-
-    private async Task LevelUpTrader(string id)
-    {
-        int newLevel = 1;
-        if (id != Traders.TraderIds.GetValueOrDefault("fence") && id != Traders.TraderIds.GetValueOrDefault("lightkeeper"))
-        {
-            newLevel = currentTraders.GetValueOrDefault(id) + 1;
-            if (newLevel > 4) newLevel = 4;
-        }
-        else if (id == Traders.TraderIds.GetValueOrDefault("fence"))
-        {
-            newLevel = currentTraders.GetValueOrDefault(id) + 1;
-            if (newLevel > 2) newLevel = 2;
-        }
-        else
-        {
-            newLevel = currentTraders.GetValueOrDefault(id) + 1;
-            if (newLevel > 1) newLevel = 1;
-        }
-        currentTraders.Remove(id);
-        currentTraders.Add(id, newLevel);
-        await Save();
-    }
-
-    private async Task LevelDownTrader(string id)
-    {
-        int newLevel = 1;
-        if (id != Traders.TraderIds.GetValueOrDefault("fence") && id != Traders.TraderIds.GetValueOrDefault("lightkeeper"))
-        {
-            newLevel = currentTraders.GetValueOrDefault(id) - 1;
-            if (newLevel < 1) newLevel = 1;
-        }
-        else if (id == Traders.TraderIds.GetValueOrDefault("fence") || id == Traders.TraderIds.GetValueOrDefault("lightkeeper"))
-        {
-            newLevel = currentTraders.GetValueOrDefault(id) - 1;
-            if (newLevel < 0) newLevel = 0;
-        }
-        currentTraders.Remove(id);
-        currentTraders.Add(id, newLevel);
-        await Save();
-    }
-
-    private async Task SwitchFaction()
-    {
-        if (faction.Equals("USEC")) faction = "BEAR";
-        else faction = "USEC";
-        await Save();
-    }
-
-    public async Task Save()
-    {
-        await BrowserStorage.SetAsync(StorageNames.PlayerFaction, faction);
-        await BrowserStorage.SetAsync(StorageNames.PlayerLevel, currentLevel);
-        await BrowserStorage.SetAsync(StorageNames.TraderLevels, currentTraders);
-        StateHasChanged();
-    }
-
-    public async Task Read()
-    {
-        var fresult = await BrowserStorage.GetAsync<string>(StorageNames.PlayerFaction);
-        faction = fresult.Success ? fresult.Value : "USEC";
-
-        var lresult = await BrowserStorage.GetAsync<int>(StorageNames.PlayerLevel);
-        currentLevel = lresult.Success ? lresult.Value : 1;
-
-        var tlresult = await BrowserStorage.GetAsync<Dictionary<string, int>>(StorageNames.TraderLevels);
-        currentTraders = tlresult.Success ? tlresult.Value : Traders.GetFreshTraders();
-    }
-
-    public async Task Delete()
-    {
-        await BrowserStorage.DeleteAsync(StorageNames.PlayerFaction);
-        await BrowserStorage.DeleteAsync(StorageNames.PlayerLevel);
-        await BrowserStorage.DeleteAsync(StorageNames.CompletedTasks);
-        await BrowserStorage.DeleteAsync(StorageNames.NeededItems);
-        await BrowserStorage.DeleteAsync(StorageNames.TraderLevels);
-        await Read();
-        StateHasChanged();
-    }
-
     /*
      * TODO:
-     *      Move everything here to a "profile" page
      *      Add a changelog and todo list to this page
      *      Move styling to CSS files
      *      Add other craft categories

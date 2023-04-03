@@ -55,6 +55,25 @@ namespace Tarkov
             }
         }
 
+        public async Task<Data> CreateMassCallAsync(string[] calls)
+        {
+			Dictionary<string, string> data = new Dictionary<string, string>();
+            string call = "{";
+            foreach (string c in calls) call += c;
+            call += "}";
+
+			data.Add("query", call);
+
+			using (var httpClient = new HttpClient())
+			{
+				var httpResponse = await httpClient.PostAsJsonAsync("https://api.tarkov.dev/graphql", data);
+				string responseContent = await httpResponse.Content.ReadAsStringAsync();
+
+				return JsonConvert.DeserializeObject<TarkovResult>(responseContent).Data;
+			}
+		}
+
+
         public TimeSpan GetTime()
         {
             // tarkov time = (real time * 7 % 24 hr) +3 hour
@@ -71,7 +90,27 @@ namespace Tarkov
             return result.Data.ServerStatus?.GeneralStatus;
         }
 
-        public async Task<Quest[]> GetTasksAsync(bool reduced = true, string faction = "ALL")
+        public async Task<Item> GetItemAsync(string id)
+        {
+			var result = await MakeCallAsync($"item (id:\"{id}\")", ObjectProperties.Item);
+            return result.Data.Item;
+        }
+
+		public async Task<Item[]> GetItemsAsync(string ids = "")
+		{
+            if (ids == "")
+            {
+                var result = await MakeCallAsync("items", ObjectProperties.Item);
+                return result.Data.Items;
+            }
+            else
+            {
+				var result = await MakeCallAsync("items (ids:["+ids+"])", ObjectProperties.Item);
+				return result.Data.Items;
+			}
+		}
+
+		public async Task<Quest[]> GetTasksAsync(bool reduced = true, string faction = "ALL")
         {
             if (faction.Equals("ALL"))
             {

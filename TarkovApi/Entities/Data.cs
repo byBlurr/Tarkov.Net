@@ -18,5 +18,11 @@ namespace Tarkov.Entities
 
         [JsonProperty("status")]
         public ServerStatus? ServerStatus { get; private set; }
-    }
+
+		[JsonProperty("item")]
+		public Item? Item { get; private set; }
+
+		[JsonProperty("items")]
+		public Item[]? Items { get; private set; }
+	}
 }

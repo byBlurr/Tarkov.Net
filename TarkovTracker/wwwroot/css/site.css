@@ -72,3 +72,35 @@ a, .btn-link {
         content: "An error has occurred."
     }
 
+.craft-card-heading {
+    display: flex;
+    align-content: center;
+    text-align: center;
+}
+
+.craft-card-requirements {
+    align-content: center;
+    text-align: center;
+    height: 145px;
+}
+
+.craft-card-requirement {
+    display: inline-block;
+    align-content: center;
+    text-align: center;
+}
+
+.craft-card-info {
+    align-content: center;
+    text-align: center;
+}
+
+.craft-card-text {
+    padding: 0px;
+    margin: 0px;
+    font-size: 14px;
+}
+
+.alert:hover {
+    background-color: lightgrey;
+}
